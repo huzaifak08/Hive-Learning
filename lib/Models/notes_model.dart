@@ -7,10 +7,10 @@ class NotesModel extends HiveObject {
   // Please Focus on Hive Field and Type:
 
   @HiveField(0)
-  final String? title;
+  String? title;
 
   @HiveField(1)
-  final String? description;
+  String? description;
 
   NotesModel({this.title, this.description});
 }

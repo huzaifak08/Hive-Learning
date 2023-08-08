@@ -32,8 +32,19 @@ class _HomeScreenState extends State<HomeScreen> {
             itemCount: box.length,
             itemBuilder: (context, index) {
               return ListTile(
+                // Edit:
+
+                onTap: () => _editNotesDialog(
+                  data[index],
+                  data[index].title.toString(),
+                  data[index].description.toString(),
+                ),
                 title: Text(data[index].title.toString()),
                 subtitle: Text(data[index].description.toString()),
+                trailing: IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: () => deleteNote(data[index]),
+                ),
               );
             },
           );
@@ -41,13 +52,13 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          _showOurDialog();
+          _addNotesDialog();
         },
       ),
     );
   }
 
-  Future<void> _showOurDialog() async {
+  Future<void> _addNotesDialog() async {
     return showDialog(
       context: context,
       builder: (context) {
@@ -103,5 +114,65 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       },
     );
+  }
+
+  // Edit:
+  Future<void> _editNotesDialog(
+      NotesModel notesModel, String title, String desc) async {
+    titleController.text = title;
+    descriptionController.text = desc;
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Edit Note'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: titleController,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: 'Enter Title',
+                ),
+              ),
+              SizedBox(height: 12),
+              TextField(
+                controller: descriptionController,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: 'Enter Description',
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                notesModel.title = titleController.text.toString();
+                notesModel.description = descriptionController.text.toString();
+
+                await notesModel.save();
+
+                titleController.clear();
+                descriptionController.clear();
+              },
+              child: const Text('Edit'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Cancel'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Delete:
+  void deleteNote(NotesModel notesModel) async {
+    await notesModel.delete();
   }
 }
