@@ -2,6 +2,7 @@ import 'package:doodh_hive_app/Boxes/boxes.dart';
 import 'package:doodh_hive_app/Models/notes_model.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -22,15 +23,19 @@ class _HomeScreenState extends State<HomeScreen> {
         centerTitle: true,
       ),
       // Show Box Data in UI:
-      body: FutureBuilder(
-        future: Hive.openBox('hunny'),
-        builder: (context, snapshot) {
-          return ListTile(
-            leading: CircleAvatar(
-              child: Text(snapshot.data!.get('age').toString()),
-            ),
-            title: Text(snapshot.data!.get('name')),
-            subtitle: Text(snapshot.data!.get('details')['pro']),
+      body: ValueListenableBuilder<Box<NotesModel>>(
+        valueListenable: Boxes.getData().listenable(),
+        builder: (context, box, child) {
+          var data = box.values.toList().cast<NotesModel>();
+
+          return ListView.builder(
+            itemCount: box.length,
+            itemBuilder: (context, index) {
+              return ListTile(
+                title: Text(data[index].title.toString()),
+                subtitle: Text(data[index].description.toString()),
+              );
+            },
           );
         },
       ),
@@ -81,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 box.add(data);
 
                 // Must run this for save method: flutter packages pub run build_runner build
-                data.save();
+                // data.save();
 
                 titleController.clear();
                 descriptionController.clear();
